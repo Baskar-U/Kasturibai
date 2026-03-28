@@ -1,62 +1,170 @@
-import { motion } from "framer-motion";
-import { LuxuryButton } from "../ui/luxury-button";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+const SLIDES = [
+  {
+    image: "/images/hero-bg.png",
+    overlayFrom: "from-black/80",
+    overlayTo: "to-black/20",
+  },
+  {
+    image: "/images/store-1.png",
+    overlayFrom: "from-black/70",
+    overlayTo: "to-black/10",
+  },
+  {
+    image: "/images/store-2.png",
+    overlayFrom: "from-black/75",
+    overlayTo: "to-black/15",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1610189014603-81b4b1a437c9?w=1400&q=80",
+    overlayFrom: "from-black/80",
+    overlayTo: "to-black/20",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1583391733958-d65105e45a27?w=1400&q=80",
+    overlayFrom: "from-black/75",
+    overlayTo: "to-black/25",
+  },
+];
+
+const TYPING_WORDS = ["Comfort", "Elegance", "Affordability", "Legacy", "Style"];
+
+function useTypingEffect(words: string[], speed = 80, pause = 2000) {
+  const [currentWord, setCurrentWord] = useState(0);
+  const [displayed, setDisplayed] = useState("");
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    const word = words[currentWord];
+    let timeout: ReturnType<typeof setTimeout>;
+
+    if (!deleting && displayed.length < word.length) {
+      timeout = setTimeout(() => setDisplayed(word.slice(0, displayed.length + 1)), speed);
+    } else if (!deleting && displayed.length === word.length) {
+      timeout = setTimeout(() => setDeleting(true), pause);
+    } else if (deleting && displayed.length > 0) {
+      timeout = setTimeout(() => setDisplayed(displayed.slice(0, -1)), speed / 2);
+    } else if (deleting && displayed.length === 0) {
+      setDeleting(false);
+      setCurrentWord((prev) => (prev + 1) % words.length);
+    }
+    return () => clearTimeout(timeout);
+  }, [displayed, deleting, currentWord, words, speed, pause]);
+
+  return displayed;
+}
 
 export function Hero() {
+  const [current, setCurrent] = useState(0);
+  const typedWord = useTypingEffect(TYPING_WORDS);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % SLIDES.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   const scrollTo = (id: string) => {
-    const element = document.querySelector(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
+    document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
-    <section id="home" className="relative h-[85vh] min-h-[600px] flex items-center justify-center overflow-hidden">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src={`${import.meta.env.BASE_URL}images/hero-bg.png`}
-          alt="Luxury fashion background"
-          className="w-full h-full object-cover object-center"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-transparent"></div>
+    <section id="home" className="relative h-[90vh] min-h-[620px] flex items-center justify-center overflow-hidden">
+      {/* Slideshow */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={current}
+          className="absolute inset-0 z-0"
+          initial={{ opacity: 0, scale: 1.05 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.98 }}
+          transition={{ duration: 1.2, ease: "easeInOut" }}
+        >
+          <img
+            src={SLIDES[current].image}
+            alt="Fashion"
+            className="w-full h-full object-cover object-center"
+          />
+          <div className={`absolute inset-0 bg-gradient-to-r ${SLIDES[current].overlayFrom} ${SLIDES[current].overlayTo}`} />
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Slide dots */}
+      <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+        {SLIDES.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrent(i)}
+            className={`h-1.5 rounded-full transition-all duration-500 ${
+              i === current ? "bg-gold w-8" : "bg-white/40 w-3"
+            }`}
+          />
+        ))}
       </div>
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center md:text-left">
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
+      {/* Prev/Next Arrows */}
+      <button
+        onClick={() => setCurrent((prev) => (prev - 1 + SLIDES.length) % SLIDES.length)}
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/40 transition-colors"
+      >
+        <ChevronLeft className="w-5 h-5" />
+      </button>
+      <button
+        onClick={() => setCurrent((prev) => (prev + 1) % SLIDES.length)}
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/40 transition-colors"
+      >
+        <ChevronRight className="w-5 h-5" />
+      </button>
+
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: 0.9, ease: "easeOut", delay: 0.3 }}
           className="max-w-2xl"
         >
-          <span className="text-gold font-semibold tracking-[0.2em] uppercase text-sm mb-4 block">
-            Since 1930s • NMP Group
+          <span className="inline-block text-gold font-body font-semibold tracking-[0.25em] uppercase text-sm mb-5 bg-white/10 backdrop-blur-sm px-4 py-1.5 rounded-full border border-gold/30">
+            Since 1930s · NMP Group · Chidambaram
           </span>
-          <h1 className="text-5xl md:text-7xl font-display font-bold text-white mb-6 leading-tight">
-            Style Meets <br/>
-            <span className="gold-gradient-text italic pr-4">Comfort.</span>
+
+          <h1 className="text-5xl md:text-7xl font-display font-bold text-white mb-3 leading-tight">
+            Style Meets
           </h1>
-          <p className="text-gray-300 text-lg md:text-xl mb-10 max-w-xl font-light">
-            Trendy fashion for every occasion. Discover our premium collections of Men's, Women's, and Kids' wear tailored for the modern lifestyle.
+          <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 leading-tight">
+            <span className="gold-gradient-text typing-cursor">{typedWord}</span>
+          </h1>
+          <p className="text-white/80 text-lg md:text-xl mb-10 max-w-xl font-body font-light leading-relaxed">
+            Trendy fashion for every occasion. Premium collections for Men, Women & Kids at unbeatable prices.
           </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-            <LuxuryButton size="lg" onClick={() => scrollTo('#collections')}>
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            <button
+              onClick={() => scrollTo('#collections')}
+              className="inline-flex items-center justify-center bg-gold text-black font-body font-bold px-8 py-4 rounded-full hover:bg-gold-light transition-all duration-300 text-sm uppercase tracking-wider shadow-lg hover:shadow-gold/30 hover:scale-105"
+            >
               Shop Now
-            </LuxuryButton>
-            <LuxuryButton variant="outline" size="lg" onClick={() => scrollTo('#about')}>
+            </button>
+            <button
+              onClick={() => scrollTo('#about')}
+              className="inline-flex items-center justify-center border-2 border-white/60 text-white font-body font-semibold px-8 py-4 rounded-full hover:bg-white hover:text-foreground transition-all duration-300 text-sm uppercase tracking-wider"
+            >
               Our Legacy
-            </LuxuryButton>
+            </button>
           </div>
         </motion.div>
       </div>
 
-      {/* Stats Banner below Hero */}
-      <div className="absolute bottom-0 w-full bg-background/5 backdrop-blur-md border-t border-white/10 hidden md:block">
-        <div className="max-w-7xl mx-auto px-4 py-6 flex justify-between text-white/80 text-sm font-medium tracking-widest uppercase">
-          <span>✨ 90+ Years Legacy</span>
-          <span>✨ 1000+ Happy Customers</span>
-          <span>✨ Affordable Luxury</span>
-          <span>✨ Curated Collections</span>
+      {/* Bottom Stats */}
+      <div className="absolute bottom-0 w-full bg-black/40 backdrop-blur-md border-t border-white/10">
+        <div className="max-w-7xl mx-auto px-4 py-5 grid grid-cols-2 md:grid-cols-4 gap-2 text-center">
+          {["✨ 90+ Years Legacy", "🏆 1000+ Happy Customers", "💰 Affordable Prices", "👔 4 Collections"].map((item) => (
+            <span key={item} className="text-white/80 text-xs font-body font-medium tracking-widest uppercase">{item}</span>
+          ))}
         </div>
       </div>
     </section>
