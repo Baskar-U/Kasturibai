@@ -1,205 +1,398 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, ZoomIn, Shuffle } from "lucide-react";
-
-const GALLERY_BASE = [
-  { id: 1, label: "Women's Collection", color: "from-rose-300 to-pink-500", emoji: "👗" },
-  { id: 2, label: "Men's Formals", color: "from-blue-300 to-indigo-500", emoji: "👔" },
-  { id: 3, label: "Silk Sarees", color: "from-amber-300 to-orange-500", emoji: "✨" },
-  { id: 4, label: "Kids Wear", color: "from-green-300 to-emerald-500", emoji: "🧸" },
-  { id: 5, label: "Festive Wear", color: "from-purple-300 to-indigo-600", emoji: "🎉" },
-  { id: 6, label: "Traditional", color: "from-red-300 to-rose-600", emoji: "🪷" },
-  { id: 7, label: "New Arrivals", color: "from-cyan-300 to-blue-500", emoji: "💎" },
-  { id: 8, label: "Accessories", color: "from-yellow-300 to-amber-500", emoji: "👒" },
-  { id: 9, label: "Bridal Wear", color: "from-fuchsia-300 to-pink-600", emoji: "💍" },
-];
+import { X, ChevronLeft, ChevronRight, ZoomIn, Play, Pause, Image, Video, Grid3X3 } from "lucide-react";
 
 const GALLERY_IMAGES = [
-  "https://images.unsplash.com/photo-1610189014603-81b4b1a437c9?w=800&q=80",
-  "https://images.unsplash.com/photo-1583391733958-d65105e45a27?w=800&q=80",
-  "https://images.unsplash.com/photo-1620012253295-c15ce3e24342?w=800&q=80",
-  "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?w=800&q=80",
-  "https://images.unsplash.com/photo-1596455607563-ad6193f78b5c?w=800&q=80",
-  "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=800&q=80",
-  "/images/store-1.png",
-  "/images/store-2.png",
-  "https://images.unsplash.com/photo-1622380590408-5ce0b22a00bd?w=800&q=80",
+  "/images/gallery/image1.jpeg",
+  "/images/gallery/image2.jpeg",
+  "/images/gallery/image3.jpeg",
+  "/images/gallery/image4.jpeg",
+  "/images/gallery/image5.jpeg",
+  "/images/gallery/image6.jpeg",
+  "/images/gallery/image7.jpeg",
+  "/images/gallery/image8.jpeg",
+  "/images/gallery/image9.jpeg",
+  "/images/gallery/image10.jpeg",
+  "/images/gallery/image11.jpeg",
 ];
 
-function shuffleArray<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
+const GALLERY_VIDEOS = [
+  "/images/gallery/video1.mp4",
+  "/images/gallery/video2.mp4",
+  "/images/gallery/video3.mp4",
+  "/images/gallery/video4.mp4",
+  "/images/gallery/video5.mp4",
+  "/images/gallery/video6.mp4",
+  "/images/gallery/video7.mp4",
+  "/images/gallery/video8.mp4",
+  "/images/gallery/video9.mp4",
+  "/images/gallery/video10.mp4",
+];
+
+type FilterType = "all" | "photos" | "videos";
+
+interface GalleryItem {
+  type: "image" | "video";
+  src: string;
+  index: number;
+}
+
+function VideoThumbnail({ src, index, onClick }: { src: string; index: number; onClick: () => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play().catch(() => {});
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  };
+
+  return (
+    <div
+      className="relative w-full aspect-square overflow-hidden rounded-xl cursor-pointer group"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={onClick}
+    >
+      <video
+        ref={videoRef}
+        src={src}
+        className="w-full h-full object-cover"
+        loop
+        playsInline
+        preload="metadata"
+      />
+      
+      {/* Play button overlay - visible when not hovered */}
+      {!isHovered && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+          <div className="w-14 h-14 bg-white/95 rounded-full flex items-center justify-center shadow-xl">
+            <Play className="w-6 h-6 text-primary ml-0.5" />
+          </div>
+        </div>
+      )}
+      
+      {/* Hover overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-3">
+        <div className="flex items-center gap-2 text-white">
+          <Play className="w-4 h-4" />
+          <span className="text-xs font-semibold">Click to view</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ImageThumbnail({ src, index, onClick }: { src: string; index: number; onClick: () => void }) {
+  return (
+    <div
+      className="relative w-full aspect-square overflow-hidden rounded-xl cursor-pointer group"
+      onClick={onClick}
+    >
+      <img
+        src={src}
+        alt={`Gallery image ${index + 1}`}
+        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+        loading="lazy"
+      />
+      
+      {/* Hover overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-3">
+        <div className="flex items-center gap-2 text-white">
+          <ZoomIn className="w-4 h-4" />
+          <span className="text-xs font-semibold">Click to view</span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function Gallery() {
-  const [items, setItems] = useState(GALLERY_BASE);
+  const [filter, setFilter] = useState<FilterType>("all");
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
-  const [isShuffling, setIsShuffling] = useState(false);
   const [autoPlay, setAutoPlay] = useState(false);
 
-  const handleShuffle = () => {
-    setIsShuffling(true);
-    setTimeout(() => {
-      setItems(shuffleArray(GALLERY_BASE));
-      setIsShuffling(false);
-    }, 300);
+  const getFilteredItems = (): GalleryItem[] => {
+    if (filter === "photos") {
+      return GALLERY_IMAGES.map((src, i) => ({ type: "image" as const, src, index: i }));
+    } else if (filter === "videos") {
+      return GALLERY_VIDEOS.map((src, i) => ({ type: "video" as const, src, index: i }));
+    } else {
+      return [
+        ...GALLERY_IMAGES.map((src, i) => ({ type: "image" as const, src, index: i })),
+        ...GALLERY_VIDEOS.map((src, i) => ({ type: "video" as const, src, index: i })),
+      ];
+    }
   };
+
+  const filteredItems = getFilteredItems();
 
   // Auto-slide the lightbox
   useEffect(() => {
     if (!autoPlay || lightboxIdx === null) return;
     const interval = setInterval(() => {
-      setLightboxIdx((prev) => (prev === null ? null : (prev + 1) % GALLERY_IMAGES.length));
+      setLightboxIdx((prev) => (prev === null ? null : (prev + 1) % filteredItems.length));
     }, 3000);
     return () => clearInterval(interval);
-  }, [autoPlay, lightboxIdx]);
+  }, [autoPlay, lightboxIdx, filteredItems.length]);
 
-  const prevImg = () => setLightboxIdx((prev) => prev === null ? null : (prev - 1 + GALLERY_IMAGES.length) % GALLERY_IMAGES.length);
-  const nextImg = () => setLightboxIdx((prev) => prev === null ? null : (prev + 1) % GALLERY_IMAGES.length);
+  const prevItem = () => setLightboxIdx((prev) => 
+    prev === null ? null : (prev - 1 + filteredItems.length) % filteredItems.length
+  );
+  
+  const nextItem = () => setLightboxIdx((prev) => 
+    prev === null ? null : (prev + 1) % filteredItems.length
+  );
 
   useEffect(() => {
     if (lightboxIdx === null) return;
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setLightboxIdx(null);
-      if (e.key === "ArrowLeft") prevImg();
-      if (e.key === "ArrowRight") nextImg();
+      if (e.key === "ArrowLeft") prevItem();
+      if (e.key === "ArrowRight") nextItem();
     };
     window.addEventListener("keydown", handleKey);
     document.body.style.overflow = "hidden";
-    return () => { window.removeEventListener("keydown", handleKey); document.body.style.overflow = ""; };
+    return () => { 
+      window.removeEventListener("keydown", handleKey); 
+      document.body.style.overflow = ""; 
+    };
   }, [lightboxIdx]);
 
+  const currentItem = lightboxIdx !== null ? filteredItems[lightboxIdx] : null;
+
   return (
-    <section id="gallery" className="py-20 bg-secondary/20">
+    <section id="gallery" className="py-20 bg-gradient-to-b from-secondary/10 to-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
-          <div>
-            <span className="text-primary font-body font-semibold text-sm uppercase tracking-wider">Our Story in Pictures</span>
-            <h2 className="text-3xl md:text-4xl font-display font-bold mt-2 mb-3">Gallery</h2>
-            <div className="w-20 h-1 bg-gold rounded-full"></div>
-          </div>
+        {/* Header */}
+        <div className="text-center mb-12">
+          <span className="text-primary font-body font-semibold text-sm uppercase tracking-wider">
+            Our Story in Pictures
+          </span>
+          <h2 className="text-3xl md:text-4xl font-display font-bold mt-2 mb-4">
+            Gallery
+          </h2>
+          <div className="w-20 h-1 bg-gold rounded-full mx-auto mb-6"></div>
+          <p className="text-muted-foreground max-w-2xl mx-auto font-body">
+            Explore our collection of beautiful moments, stunning outfits, and memorable events
+          </p>
+        </div>
+
+        {/* Filter Tabs */}
+        <div className="flex justify-center gap-2 mb-10">
           <button
-            onClick={handleShuffle}
-            className="mt-4 md:mt-0 flex items-center gap-2 border border-border px-4 py-2 rounded-full text-sm font-body font-semibold hover:border-primary hover:text-primary transition-colors"
+            onClick={() => setFilter("all")}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-body font-semibold transition-all duration-300 ${
+              filter === "all"
+                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
+                : "bg-secondary/50 text-foreground hover:bg-secondary"
+            }`}
           >
-            <Shuffle className="w-4 h-4" /> Shuffle
+            <Grid3X3 className="w-4 h-4" />
+            All ({GALLERY_IMAGES.length + GALLERY_VIDEOS.length})
+          </button>
+          <button
+            onClick={() => setFilter("photos")}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-body font-semibold transition-all duration-300 ${
+              filter === "photos"
+                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
+                : "bg-secondary/50 text-foreground hover:bg-secondary"
+            }`}
+          >
+            <Image className="w-4 h-4" />
+            Photos ({GALLERY_IMAGES.length})
+          </button>
+          <button
+            onClick={() => setFilter("videos")}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-body font-semibold transition-all duration-300 ${
+              filter === "videos"
+                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
+                : "bg-secondary/50 text-foreground hover:bg-secondary"
+            }`}
+          >
+            <Video className="w-4 h-4" />
+            Videos ({GALLERY_VIDEOS.length})
           </button>
         </div>
 
-        {/* Masonry-like grid */}
+        {/* Grid Layout - Perfect Alignment */}
         <motion.div
           layout
-          className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-[180px] transition-opacity ${isShuffling ? "opacity-0" : "opacity-100"}`}
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
         >
-          {items.map((item, i) => {
-            const isLarge = i === 0 || i === 4;
-            return (
+          <AnimatePresence mode="popLayout">
+            {filteredItems.map((item, i) => (
               <motion.div
                 layout
-                key={item.id}
-                className={`relative overflow-hidden rounded-2xl cursor-pointer group ${isLarge ? "row-span-2" : "row-span-1"}`}
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.25 }}
-                onClick={() => setLightboxIdx(i % GALLERY_IMAGES.length)}
+                key={`${item.type}-${item.index}`}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.3 }}
               >
-                {i < GALLERY_IMAGES.length ? (
-                  <img
-                    src={GALLERY_IMAGES[i]}
-                    alt={item.label}
-                    className="w-full h-full object-cover object-center"
+                {item.type === "video" ? (
+                  <VideoThumbnail
+                    src={item.src}
+                    index={item.index}
+                    onClick={() => setLightboxIdx(i)}
                   />
                 ) : (
-                  <div className={`w-full h-full bg-gradient-to-br ${item.color} flex items-center justify-center`}>
-                    <span className={`${isLarge ? "text-7xl" : "text-5xl"}`}>{item.emoji}</span>
-                  </div>
+                  <ImageThumbnail
+                    src={item.src}
+                    index={item.index}
+                    onClick={() => setLightboxIdx(i)}
+                  />
                 )}
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/45 transition-colors duration-300 flex items-center justify-center">
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center gap-2">
-                    <ZoomIn className="w-8 h-8 text-white" />
-                  </div>
-                </div>
-                {/* Label */}
-                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                  <span className="text-white text-sm font-body font-semibold">{item.label}</span>
-                </div>
               </motion.div>
-            );
-          })}
+            ))}
+          </AnimatePresence>
         </motion.div>
+
+        {/* Stats */}
+        <div className="mt-12 flex justify-center gap-8 text-center">
+          <div className="bg-secondary/30 rounded-2xl px-6 py-4">
+            <div className="text-3xl font-display font-bold text-primary">{GALLERY_IMAGES.length}</div>
+            <div className="text-sm text-muted-foreground font-body">Photos</div>
+          </div>
+          <div className="bg-secondary/30 rounded-2xl px-6 py-4">
+            <div className="text-3xl font-display font-bold text-primary">{GALLERY_VIDEOS.length}</div>
+            <div className="text-sm text-muted-foreground font-body">Videos</div>
+          </div>
+          <div className="bg-secondary/30 rounded-2xl px-6 py-4">
+            <div className="text-3xl font-display font-bold text-primary">{GALLERY_IMAGES.length + GALLERY_VIDEOS.length}</div>
+            <div className="text-sm text-muted-foreground font-body">Total Media</div>
+          </div>
+        </div>
       </div>
 
       {/* Lightbox */}
       <AnimatePresence>
-        {lightboxIdx !== null && (
+        {lightboxIdx !== null && currentItem && (
           <motion.div
-            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+            className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setLightboxIdx(null)}
           >
-            {/* Close */}
-            <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/40 transition-colors z-10" onClick={() => setLightboxIdx(null)}>
-              <X className="w-5 h-5" />
+            {/* Close button */}
+            <button 
+              className="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 transition-colors z-10" 
+              onClick={() => setLightboxIdx(null)}
+            >
+              <X className="w-6 h-6" />
             </button>
 
             {/* Auto-play toggle */}
             <button
-              className={`absolute top-4 left-4 px-3 py-1.5 rounded-full text-xs font-body font-semibold transition-colors z-10 ${autoPlay ? "bg-gold text-black" : "bg-white/20 text-white hover:bg-white/30"}`}
+              className={`absolute top-4 left-4 px-4 py-2 rounded-full text-sm font-body font-semibold transition-all z-10 flex items-center gap-2 ${
+                autoPlay 
+                  ? "bg-gold text-black shadow-lg shadow-gold/30" 
+                  : "bg-white/10 backdrop-blur-sm text-white hover:bg-white/20"
+              }`}
               onClick={(e) => { e.stopPropagation(); setAutoPlay(!autoPlay); }}
             >
-              {autoPlay ? "⏸ Stop" : "▶ Auto"}
+              {autoPlay ? (
+                <>
+                  <Pause className="w-4 h-4" />
+                  Pause
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4" />
+                  Auto Play
+                </>
+              )}
             </button>
 
-            {/* Prev */}
-            <button className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/40 transition-colors z-10" onClick={(e) => { e.stopPropagation(); prevImg(); }}>
+            {/* Previous button */}
+            <button 
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 transition-colors z-10" 
+              onClick={(e) => { e.stopPropagation(); prevItem(); }}
+            >
               <ChevronLeft className="w-6 h-6" />
             </button>
 
-            {/* Image */}
+            {/* Media Content */}
             <motion.div
               key={lightboxIdx}
-              className="max-w-4xl w-full mx-16 flex items-center justify-center"
+              className="max-w-5xl w-full mx-16 flex items-center justify-center"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
               onClick={(e) => e.stopPropagation()}
             >
-              {lightboxIdx < GALLERY_IMAGES.length ? (
-                <img src={GALLERY_IMAGES[lightboxIdx]} alt="" className="max-h-[80vh] w-full object-contain rounded-2xl shadow-2xl" />
+              {currentItem.type === "image" ? (
+                <img 
+                  src={currentItem.src} 
+                  alt={`Gallery image ${currentItem.index + 1}`} 
+                  className="max-h-[85vh] w-auto max-w-full object-contain rounded-2xl shadow-2xl" 
+                />
               ) : (
-                <div className={`w-full aspect-video rounded-2xl bg-gradient-to-br ${items[lightboxIdx].color} flex items-center justify-center`}>
-                  <span className="text-8xl">{items[lightboxIdx].emoji}</span>
+                <div className="relative w-full max-w-4xl">
+                  <video
+                    src={currentItem.src}
+                    className="w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl"
+                    controls
+                    autoPlay
+                    playsInline
+                  />
                 </div>
               )}
             </motion.div>
 
-            {/* Next */}
-            <button className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/40 transition-colors z-10" onClick={(e) => { e.stopPropagation(); nextImg(); }}>
+            {/* Next button */}
+            <button 
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 transition-colors z-10" 
+              onClick={(e) => { e.stopPropagation(); nextItem(); }}
+            >
               <ChevronRight className="w-6 h-6" />
             </button>
 
-            {/* Dots */}
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-              {GALLERY_IMAGES.map((_, i) => (
+            {/* Dots indicator */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10 max-w-xl overflow-x-auto px-4 py-2">
+              {filteredItems.map((item, i) => (
                 <button
-                  key={i}
+                  key={`${item.type}-${item.index}`}
                   onClick={(e) => { e.stopPropagation(); setLightboxIdx(i); }}
-                  className={`w-2 h-2 rounded-full transition-all ${i === lightboxIdx ? "bg-gold w-6" : "bg-white/40"}`}
+                  className={`flex-shrink-0 h-2 rounded-full transition-all duration-300 ${
+                    i === lightboxIdx 
+                      ? "bg-gold w-8" 
+                      : item.type === "video" 
+                        ? "bg-red-400/60 w-2 hover:bg-red-400" 
+                        : "bg-white/40 w-2 hover:bg-white/60"
+                  }`}
                 />
               ))}
             </div>
 
             {/* Caption */}
-            <div className="absolute bottom-14 left-1/2 -translate-x-1/2 text-center">
-              <span className="text-white font-body font-semibold text-sm bg-black/40 px-4 py-1.5 rounded-full">
-                {items[lightboxIdx % items.length]?.label} · {lightboxIdx + 1} / {GALLERY_IMAGES.length}
+            <div className="absolute bottom-16 left-1/2 -translate-x-1/2 text-center">
+              <span className="text-white font-body font-semibold text-sm bg-black/60 backdrop-blur-sm px-5 py-2 rounded-full flex items-center gap-2">
+                {currentItem.type === "image" ? (
+                  <>
+                    <Image className="w-4 h-4" />
+                    Photo {currentItem.index + 1}
+                  </>
+                ) : (
+                  <>
+                    <Video className="w-4 h-4" />
+                    Video {currentItem.index + 1}
+                  </>
+                )}
+                <span className="text-white/60">·</span>
+                <span>{lightboxIdx + 1} / {filteredItems.length}</span>
               </span>
             </div>
           </motion.div>

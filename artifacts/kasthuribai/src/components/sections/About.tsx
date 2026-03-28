@@ -57,7 +57,7 @@ export function About() {
                 <p className="text-sm font-body text-muted-foreground uppercase tracking-wider">Years Legacy</p>
               </div>
               <div className="h-48 rounded-2xl overflow-hidden">
-                <img src="/images/store-1.png" alt="Our store" className="w-full h-full object-cover" />
+                <img src="/images/kasturi5.jpeg" alt="Our store" className="w-full h-full object-cover" />
               </div>
             </div>
 

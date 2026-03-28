@@ -4,12 +4,12 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const SLIDES = [
   {
-    image: "/images/hero-bg.png",
+    image: "/images/kasturi2.png",
     overlayFrom: "from-black/80",
     overlayTo: "to-black/20",
   },
   {
-    image: "/images/store-1.png",
+    image: "/images/kasturi3.jpg",
     overlayFrom: "from-black/70",
     overlayTo: "to-black/10",
   },
@@ -19,18 +19,18 @@ const SLIDES = [
     overlayTo: "to-black/15",
   },
   {
-    image: "https://images.unsplash.com/photo-1610189014603-81b4b1a437c9?w=1400&q=80",
+    image: "/images/kasturi4.jpg",
     overlayFrom: "from-black/80",
     overlayTo: "to-black/20",
   },
   {
-    image: "https://images.unsplash.com/photo-1583391733958-d65105e45a27?w=1400&q=80",
+    image: "/images/kasturi5.jpeg",
     overlayFrom: "from-black/75",
     overlayTo: "to-black/25",
   },
 ];
 
-const TYPING_WORDS = ["Comfort", "Elegance", "Affordability", "Legacy", "Style"];
+const TYPING_WORDS = ["Comfort", "Elegance", "Affordability", "Legacy"];
 
 function useTypingEffect(words: string[], speed = 80, pause = 2000) {
   const [currentWord, setCurrentWord] = useState(0);

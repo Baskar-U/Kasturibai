@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/hooks/use-theme";
 import Home from "@/pages/Home";
 import NotFound from "@/pages/not-found";
+import { WelcomeAudio } from "@/components/WelcomeAudio";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <WelcomeAudio />
             <Router />
           </WouterRouter>
           <Toaster />

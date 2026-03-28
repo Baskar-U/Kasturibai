@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ShoppingBag, Search, Menu, X } from "lucide-react";
 import { useCart } from "@/store/use-cart";
 import { cn } from "@/lib/utils";
+import { SpinWheel } from "@/components/SpinWheel";
 
 const NAV_LINKS = [
   { name: "Home", href: "#home" },
@@ -20,37 +21,14 @@ function KasthuribaiLogo({ onClick }: { onClick: () => void }) {
       className="flex items-center gap-2.5 group flex-shrink-0 focus:outline-none"
       aria-label="Kasthuribai Ready Mades – Home"
     >
-      {/* Emblem */}
-      <svg
+      {/* Logo image */}
+      <img
+        src="/favicon.png"
+        alt="Kasthuribai Logo"
         width="38"
         height="38"
-        viewBox="0 0 38 38"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
         className="flex-shrink-0"
-      >
-        {/* Outer circle */}
-        <circle cx="19" cy="19" r="18" stroke="#7D1A35" strokeWidth="1.5" />
-        {/* Inner ring */}
-        <circle cx="19" cy="19" r="13.5" stroke="#D4A035" strokeWidth="0.8" strokeDasharray="2 2" />
-        {/* K letterform */}
-        <text
-          x="19"
-          y="25"
-          textAnchor="middle"
-          fontFamily="Cinzel, serif"
-          fontSize="16"
-          fontWeight="600"
-          fill="#7D1A35"
-        >
-          K
-        </text>
-        {/* Top & bottom gold ornament dots */}
-        <circle cx="19" cy="3.5" r="1.5" fill="#D4A035" />
-        <circle cx="19" cy="34.5" r="1.5" fill="#D4A035" />
-        <circle cx="3.5" cy="19" r="1.5" fill="#D4A035" />
-        <circle cx="34.5" cy="19" r="1.5" fill="#D4A035" />
-      </svg>
+      />
 
       {/* Brand text */}
       <div className="flex flex-col leading-none">
@@ -60,7 +38,7 @@ function KasthuribaiLogo({ onClick }: { onClick: () => void }) {
           Kasthuribai
         </span>
         <span className="font-body text-[7.5px] tracking-[0.25em] text-gold uppercase font-semibold -mt-0.5">
-          Ready Mades · Est. 1930s
+          Company · NMP Readymades
         </span>
       </div>
     </button>
@@ -120,7 +98,7 @@ export function Navbar() {
             ))}
           </div>
 
-          {/* RIGHT – Search + Cart */}
+          {/* RIGHT – Search + Spin + Cart */}
           <div className="flex items-center gap-2">
             {/* Search pill */}
             <div className={cn(
@@ -145,6 +123,9 @@ export function Navbar() {
                 </button>
               )}
             </div>
+
+            {/* Spin Wheel button */}
+            <SpinWheel />
 
             {/* Cart button */}
             <button
@@ -175,6 +156,9 @@ export function Navbar() {
           <div className="flex-1 flex justify-center">
             <KasthuribaiLogo onClick={() => scrollTo("#home")} />
           </div>
+
+          {/* Mobile spin wheel */}
+          <SpinWheel />
 
           {/* Mobile cart */}
           <button

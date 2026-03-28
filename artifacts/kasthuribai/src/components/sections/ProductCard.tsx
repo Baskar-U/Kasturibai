@@ -47,18 +47,36 @@ export function ProductCard({ product, onView }: ProductCardProps) {
           loading="lazy"
         />
 
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-          {product.badges?.slice(0, 1).map((badge) => (
-            <span key={badge} className={`text-[10px] font-body font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${BADGE_STYLES[badge] ?? "bg-primary text-white"}`}>
+        {/* New badge - top left */}
+        {product.badges?.includes("New Arrival") && (
+          <div className="absolute top-3 left-3">
+            <span className="text-[10px] font-body font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider bg-blue-500 text-white">
+              New
+            </span>
+          </div>
+        )}
+
+        {/* Premium/Trending badge - top right */}
+        {(product.badges?.includes("Premium") || product.badges?.includes("Trending")) && (
+          <div className="absolute top-3 right-3">
+            <span className={`text-[10px] font-body font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${product.badges?.includes("Premium") ? "bg-gray-800 text-white" : "bg-violet-500 text-white"}`}>
+              {product.badges?.includes("Premium") ? "Premium" : "Trending"}
+            </span>
+          </div>
+        )}
+
+        {/* Other badges - top left below New */}
+        {product.badges?.filter(badge => !["New Arrival", "Premium", "Trending"].includes(badge)).map((badge, index) => (
+          <div key={badge} className={`absolute left-3 ${product.badges?.includes("New Arrival") ? "top-[52px]" : "top-3"}`} style={{ marginTop: index * 28 }}>
+            <span className={`text-[10px] font-body font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${BADGE_STYLES[badge] ?? "bg-primary text-white"}`}>
               {badge}
             </span>
-          ))}
-        </div>
+          </div>
+        ))}
 
-        {/* Discount badge */}
+        {/* Discount badge - bottom right */}
         {discount > 0 && (
-          <div className="absolute top-3 right-3 w-11 h-11 bg-green-500 text-white text-xs font-body font-bold rounded-full flex items-center justify-center shadow-md">
+          <div className="absolute bottom-3 right-3 w-11 h-11 bg-green-500 text-white text-xs font-body font-bold rounded-full flex items-center justify-center shadow-md">
             -{discount}%
           </div>
         )}
