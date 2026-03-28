@@ -230,3 +230,31 @@ html {
   animation: typing-cursor 0.7s ease-in-out infinite;
   color: hsl(var(--gold));
 }
+
+/* Cart bounce animation */
+@keyframes cart-bounce {
+  0%   { transform: scale(1) rotate(0deg); }
+  20%  { transform: scale(1.35) rotate(-12deg); }
+  40%  { transform: scale(1.2) rotate(8deg); }
+  60%  { transform: scale(1.25) rotate(-6deg); }
+  80%  { transform: scale(1.1) rotate(3deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+.animate-cart-bounce {
+  animation: cart-bounce 0.6s ease-in-out;
+}
+
+/* Scale hover for product images */
+.group:hover .group-hover\:scale-106 {
+  transform: scale(1.06);
+}
+
+/* Scrollbar hide for carousels */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

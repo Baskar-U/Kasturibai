@@ -12,6 +12,7 @@ import { Reviews } from "@/components/sections/Reviews";
 import { Contact } from "@/components/sections/Contact";
 import { Footer } from "@/components/sections/Footer";
 import { CartDrawer } from "@/components/CartDrawer";
+import { CartToast } from "@/components/CartToast";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { ProductModal } from "@/components/ProductModal";
 import { Product, Category } from "@/data/mock-data";
@@ -77,6 +78,7 @@ export default function Home() {
       <Footer />
 
       <CartDrawer />
+      <CartToast />
       <FloatingWhatsApp />
 
       <ProductModal

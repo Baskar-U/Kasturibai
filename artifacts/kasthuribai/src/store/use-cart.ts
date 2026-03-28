@@ -6,9 +6,15 @@ export interface CartItem extends Product {
   quantity: number;
 }
 
+export interface LastAdded extends Product {
+  addedAt: number;
+}
+
 interface CartStore {
   items: CartItem[];
   isOpen: boolean;
+  cartBounce: boolean;
+  lastAdded: LastAdded | null;
   addItem: (product: Product) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
@@ -23,19 +29,23 @@ export const useCart = create<CartStore>()(
     (set, get) => ({
       items: [],
       isOpen: false,
+      cartBounce: false,
+      lastAdded: null,
       addItem: (product) => {
         set((state) => {
           const existingItem = state.items.find((item) => item.id === product.id);
-          if (existingItem) {
-            return {
-              items: state.items.map((item) =>
+          const newItems = existingItem
+            ? state.items.map((item) =>
                 item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-              ),
-              isOpen: true,
-            };
-          }
-          return { items: [...state.items, { ...product, quantity: 1 }], isOpen: true };
+              )
+            : [...state.items, { ...product, quantity: 1 }];
+          return {
+            items: newItems,
+            cartBounce: true,
+            lastAdded: { ...product, addedAt: Date.now() },
+          };
         });
+        setTimeout(() => set({ cartBounce: false, lastAdded: null }), 2500);
       },
       removeItem: (productId) => {
         set((state) => ({
@@ -44,11 +54,11 @@ export const useCart = create<CartStore>()(
       },
       updateQuantity: (productId, quantity) => {
         set((state) => ({
-          items: quantity === 0 
+          items: quantity === 0
             ? state.items.filter((item) => item.id !== productId)
             : state.items.map((item) =>
-              item.id === productId ? { ...item, quantity } : item
-            ),
+                item.id === productId ? { ...item, quantity } : item
+              ),
         }));
       },
       clearCart: () => set({ items: [] }),
