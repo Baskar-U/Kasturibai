@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/sections/Navbar";
 import { Footer } from "@/components/sections/Footer";
 import { CartDrawer } from "@/components/CartDrawer";
@@ -7,6 +7,7 @@ import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Spinner } from "@/components/ui/spinner";
 import { 
   Video, 
   Phone, 
@@ -133,6 +134,15 @@ export default function VideoShopping() {
   const [isCallActive, setIsCallActive] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOn, setIsVideoOn] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate page loading
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const startCall = (worker: Worker) => {
     setSelectedWorker(worker);
@@ -143,6 +153,17 @@ export default function VideoShopping() {
     setIsCallActive(false);
     setSelectedWorker(null);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <Spinner size="lg" className="mx-auto mb-4" />
+          <p className="text-muted-foreground font-body">Loading Video Shopping...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative flex flex-col bg-background">
@@ -499,37 +520,47 @@ export default function VideoShopping() {
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-foreground mb-6">
                   Shop Smarter with Video Shopping
                 </h2>
-                <div className="space-y-4">
-                  {[
-                    "See products in real-time before purchasing",
-                    "Get expert styling advice personalized to you",
-                    "Save time by shopping from anywhere",
-                    "Access exclusive in-store collections online",
-                    "Enjoy a personalized shopping experience",
-                    "Get instant answers to all your questions"
-                  ].map((benefit, index) => (
-                    <div key={index} className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <CheckCircle2 className="w-4 h-4 text-green-500" />
-                      </div>
-                      <p className="text-foreground font-body">{benefit}</p>
+                <ul className="space-y-4">
+                  <li className="flex items-start gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-foreground">See Products in Detail</h4>
+                      <p className="text-muted-foreground text-sm">Get a close-up view of fabrics, colors, and craftsmanship before buying</p>
                     </div>
-                  ))}
-                </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-foreground">Expert Styling Advice</h4>
+                      <p className="text-muted-foreground text-sm">Get personalized recommendations based on your preferences and occasion</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-foreground">Save Time</h4>
+                      <p className="text-muted-foreground text-sm">Shop from home without the hassle of visiting multiple stores</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-foreground">Instant Answers</h4>
+                      <p className="text-muted-foreground text-sm">Get all your questions answered in real-time by our fashion experts</p>
+                    </div>
+                  </li>
+                </ul>
               </div>
               <div className="relative">
-                <div className="aspect-square bg-gradient-to-br from-primary/20 to-gold/20 rounded-3xl p-8 flex items-center justify-center">
+                <div className="aspect-square bg-gradient-to-br from-primary/20 to-gold/20 rounded-3xl flex items-center justify-center">
                   <div className="text-center">
-                    <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-gold flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                    <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-gold flex items-center justify-center mx-auto mb-6 shadow-xl">
                       <Video className="w-16 h-16 text-white" />
                     </div>
-                    <h3 className="text-2xl font-display font-bold text-foreground mb-2">Live Shopping</h3>
-                    <p className="text-muted-foreground font-body">Connect instantly with our experts</p>
+                    <h3 className="text-2xl font-display font-bold text-foreground mb-2">Start Your Journey</h3>
+                    <p className="text-muted-foreground">Connect with experts today</p>
                   </div>
                 </div>
-                {/* Floating elements */}
-                <div className="absolute -top-4 -right-4 w-20 h-20 bg-gold/30 rounded-full blur-xl"></div>
-                <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-primary/30 rounded-full blur-xl"></div>
               </div>
             </div>
           </div>

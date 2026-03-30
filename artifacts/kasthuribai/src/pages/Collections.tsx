@@ -7,6 +7,7 @@ import { CartDrawer } from "@/components/CartDrawer";
 import { CartToast } from "@/components/CartToast";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { ProductModal } from "@/components/ProductModal";
+import { Spinner } from "@/components/ui/spinner";
 import { Product, Category } from "@/data/mock-data";
 
 export default function Collections() {
@@ -15,6 +16,7 @@ export default function Collections() {
   const urlCategory = params.get("category") as Category;
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [activeFilter, setActiveFilter] = useState<Category | "All">("All");
+  const [isLoading, setIsLoading] = useState(true);
 
   // Sync activeFilter with URL category param
   useEffect(() => {
@@ -23,7 +25,26 @@ export default function Collections() {
     setActiveFilter(newCategory as Category | "All");
   }, [window.location.search]);
 
+  useEffect(() => {
+    // Simulate page loading
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
   console.log('location:', location, 'activeFilter:', activeFilter);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <Spinner size="lg" className="mx-auto mb-4" />
+          <p className="text-muted-foreground font-body">Loading Collections...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative flex flex-col bg-background">
@@ -52,4 +73,3 @@ export default function Collections() {
     </div>
   );
 }
-

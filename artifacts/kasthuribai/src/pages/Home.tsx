@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/sections/Navbar";
 import { Hero } from "@/components/sections/Hero";
 import { Categories } from "@/components/sections/Categories";
 import { NewArrivals } from "@/components/sections/NewArrivals";
 import { OfferBanner } from "@/components/sections/OfferBanner";
-import { Products } from "@/components/sections/Products";
+// import { Products } from "@/components/sections/Products";
 import { CategoryPreview } from "@/components/sections/CategoryPreview";
 import { BestSellers } from "@/components/sections/BestSellers";
 import { About } from "@/components/sections/About";
@@ -16,6 +16,7 @@ import { CartDrawer } from "@/components/CartDrawer";
 import { CartToast } from "@/components/CartToast";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { ProductModal } from "@/components/ProductModal";
+import { Spinner } from "@/components/ui/spinner";
 import { Product, Category } from "@/data/mock-data";
 import { Truck, ShieldCheck, RotateCcw, Scissors } from "lucide-react";
 
@@ -51,10 +52,30 @@ function FeatureStrip() {
 export default function Home() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [activeFilter, setActiveFilter] = useState<Category | "All">("All");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate page loading
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleCategoryFilter = (cat: Category) => {
     setActiveFilter(cat);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <Spinner size="lg" className="mx-auto mb-4" />
+          <p className="text-muted-foreground font-body">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative flex flex-col bg-background">
@@ -66,12 +87,6 @@ export default function Home() {
         <NewArrivals onViewProduct={setSelectedProduct} />
         <OfferBanner />
         
-        {/* Main Collections with Filters */}
-        {/* <Products
-          onViewProduct={setSelectedProduct}
-          activeFilter={activeFilter}
-          onFilterChange={(f) => setActiveFilter(f)}
-        /> */}
         
         {/* Category Preview Sections - Limited Products with Show More */}
         <CategoryPreview
