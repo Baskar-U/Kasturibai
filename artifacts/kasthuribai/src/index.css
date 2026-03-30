@@ -266,3 +266,18 @@ html {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Custom scrollbar for filter panel */
+.filter-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.filter-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.filter-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--gold));
+  border-radius: 2px;
+}
+.filter-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--gold-dark));
+}

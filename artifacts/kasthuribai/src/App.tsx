@@ -4,6 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/hooks/use-theme";
 import Home from "@/pages/Home";
+import Collections from "@/pages/Collections";
+import VideoShopping from "@/pages/VideoShopping";
 import NotFound from "@/pages/not-found";
 import { WelcomeAudio } from "@/components/WelcomeAudio";
 
@@ -13,6 +15,8 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/collections" component={Collections} />
+      <Route path="/video-shopping" component={VideoShopping} />
       <Route component={NotFound} />
     </Switch>
   );

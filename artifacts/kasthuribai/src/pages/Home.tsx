@@ -5,6 +5,10 @@ import { Categories } from "@/components/sections/Categories";
 import { NewArrivals } from "@/components/sections/NewArrivals";
 import { OfferBanner } from "@/components/sections/OfferBanner";
 import { Products } from "@/components/sections/Products";
+import { MenSection } from "@/components/sections/MenSection";
+import { WomenSection } from "@/components/sections/WomenSection";
+import { KidsSection } from "@/components/sections/KidsSection";
+import { FestivalCollection } from "@/components/sections/FestivalCollection";
 import { BestSellers } from "@/components/sections/BestSellers";
 import { About } from "@/components/sections/About";
 import { Gallery } from "@/components/sections/Gallery";
@@ -64,11 +68,20 @@ export default function Home() {
         <Categories onCategoryFilter={handleCategoryFilter} />
         <NewArrivals onViewProduct={setSelectedProduct} />
         <OfferBanner />
+        
+        {/* Main Collections with Filters */}
         <Products
           onViewProduct={setSelectedProduct}
           activeFilter={activeFilter}
           onFilterChange={(f) => setActiveFilter(f)}
         />
+        
+        {/* Category-Specific Sections */}
+        <MenSection onViewProduct={setSelectedProduct} />
+        <WomenSection onViewProduct={setSelectedProduct} />
+        <KidsSection onViewProduct={setSelectedProduct} />
+        <FestivalCollection onViewProduct={setSelectedProduct} />
+        
         <BestSellers onViewProduct={setSelectedProduct} />
         <About />
         <Gallery />
