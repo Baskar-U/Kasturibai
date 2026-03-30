@@ -5,10 +5,7 @@ import { Categories } from "@/components/sections/Categories";
 import { NewArrivals } from "@/components/sections/NewArrivals";
 import { OfferBanner } from "@/components/sections/OfferBanner";
 import { Products } from "@/components/sections/Products";
-import { MenSection } from "@/components/sections/MenSection";
-import { WomenSection } from "@/components/sections/WomenSection";
-import { KidsSection } from "@/components/sections/KidsSection";
-import { FestivalCollection } from "@/components/sections/FestivalCollection";
+import { CategoryPreview } from "@/components/sections/CategoryPreview";
 import { BestSellers } from "@/components/sections/BestSellers";
 import { About } from "@/components/sections/About";
 import { Gallery } from "@/components/sections/Gallery";
@@ -70,17 +67,53 @@ export default function Home() {
         <OfferBanner />
         
         {/* Main Collections with Filters */}
-        <Products
+        {/* <Products
           onViewProduct={setSelectedProduct}
           activeFilter={activeFilter}
           onFilterChange={(f) => setActiveFilter(f)}
-        />
+        /> */}
         
-        {/* Category-Specific Sections */}
-        <MenSection onViewProduct={setSelectedProduct} />
-        <WomenSection onViewProduct={setSelectedProduct} />
-        <KidsSection onViewProduct={setSelectedProduct} />
-        <FestivalCollection onViewProduct={setSelectedProduct} />
+        {/* Category Preview Sections - Limited Products with Show More */}
+        <CategoryPreview
+          category="Men"
+          title="Men's Wear"
+          subtitle="Shirts, T-Shirts, Jeans & Formal Wear"
+          emoji="👔"
+          gradientFrom="from-blue-50/50"
+          gradientTo="to-white"
+          limit={6}
+          onViewProduct={setSelectedProduct}
+        />
+        <CategoryPreview
+          category="Women"
+          title="Women's Wear"
+          subtitle="Sarees, Kurtis, Chudidhar & Gowns"
+          emoji="👗"
+          gradientFrom="from-rose-50/50"
+          gradientTo="to-white"
+          limit={6}
+          onViewProduct={setSelectedProduct}
+        />
+        <CategoryPreview
+          category="Kids"
+          title="Kids' Wear"
+          subtitle="Colorful & Comfortable Collection for Kids"
+          emoji="🧒"
+          gradientFrom="from-green-50/50"
+          gradientTo="to-white"
+          limit={6}
+          onViewProduct={setSelectedProduct}
+        />
+        <CategoryPreview
+          category="Traditional"
+          title="Traditional Wear"
+          subtitle="Classic Ethnic Collection for Every Occasion"
+          emoji="🎊"
+          gradientFrom="from-amber-50/50"
+          gradientTo="to-white"
+          limit={6}
+          onViewProduct={setSelectedProduct}
+        />
         
         <BestSellers onViewProduct={setSelectedProduct} />
         <About />
