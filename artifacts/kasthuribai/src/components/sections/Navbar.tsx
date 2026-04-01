@@ -13,6 +13,7 @@ const NAV_LINKS = [
   { name: "Festival", href: "/collections?category=Festive" },
   { name: "Collections", href: "/collections" },
   { name: "Video Shopping", href: "/video-shopping" },
+  { name: "My Orders", href: "/my-orders" },
 ];
 
 function KasthuribaiLogo({ onClick }: { onClick: () => void }) {

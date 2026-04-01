@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { X, Minus, Plus, ShoppingBag, MessageCircle, CreditCard, Smartphone, ChevronRight, ChevronDown, Trash2, Lock, CheckCircle2 } from "lucide-react";
+import { X, Minus, Plus, ShoppingBag, MessageCircle, CreditCard, Smartphone, ChevronRight, ChevronDown, Trash2, Lock, CheckCircle2, Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCart } from "@/store/use-cart";
 import { formatPrice } from "@/lib/utils";
+import { useOrders, defaultTrackingSteps } from "@/store/use-orders";
+import { createRazorpayOrder, initializePayment, verifyPayment, CustomerDetails } from "@/lib/razorpay";
+import { useLocation } from "wouter";
 
 type PaymentStep = "cart" | "checkout";
-type PaymentMethod = "upi" | "card" | "whatsapp" | null;
+type PaymentMethod = "upi" | "card" | "whatsapp" | "razorpay" | null;
 
 function UPIPanel({ total, onClose }: { total: number; onClose: () => void }) {
   const [upiId, setUpiId] = useState("");
@@ -109,6 +112,152 @@ function CardPanel({ total, onClose }: { total: number; onClose: () => void }) {
           <CheckCircle2 className="w-5 h-5" /> Payment confirmed! Order placed.
         </div>
       )}
+    </motion.div>
+  );
+}
+
+function RazorpayPanel({ total, items, onClose }: { total: number; items: any[]; onClose: () => void }) {
+  const [form, setForm] = useState({ name: "", email: "", phone: "", address: "" });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const { addOrder } = useOrders();
+  const { clearCart } = useCart();
+  const [, setLocation] = useLocation();
+
+  const handlePay = async () => {
+    if (!form.name || !form.email || !form.phone || !form.address) {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const customerDetails: CustomerDetails = {
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        address: form.address,
+      };
+
+      // Create order
+      const order = await createRazorpayOrder(total, items, customerDetails);
+
+      // Initialize payment
+      await initializePayment(
+        order,
+        customerDetails,
+        async (paymentDetails) => {
+          // Verify payment
+          const isVerified = await verifyPayment(paymentDetails);
+
+          if (isVerified) {
+            // Create order in store
+            const newOrder = {
+              id: `order_${Date.now()}`,
+              razorpayOrderId: paymentDetails.razorpay_order_id,
+              razorpayPaymentId: paymentDetails.razorpay_payment_id,
+              items: items,
+              totalAmount: total,
+              status: "confirmed" as const,
+              customerName: form.name,
+              customerEmail: form.email,
+              customerPhone: form.phone,
+              shippingAddress: form.address,
+              trackingSteps: defaultTrackingSteps.map((step) => ({
+                ...step,
+                timestamp: step.status === "confirmed" ? new Date().toISOString() : null,
+                completed: step.status === "confirmed",
+              })),
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            };
+
+            addOrder(newOrder);
+            clearCart();
+            onClose();
+            setLocation(`/order-tracking/${newOrder.id}`);
+          } else {
+            setError("Payment verification failed. Please try again.");
+          }
+          setLoading(false);
+        },
+        (error) => {
+          setError(error.message || "Payment failed. Please try again.");
+          setLoading(false);
+        }
+      );
+    } catch (err: any) {
+      setError(err.message || "Failed to process payment. Please try again.");
+      setLoading(false);
+    }
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-4 bg-green-50 border border-green-100 rounded-2xl p-4 space-y-3">
+      <div className="flex items-center gap-2 mb-2">
+        <CreditCard className="w-4 h-4 text-green-600" />
+        <span className="font-body font-bold text-sm text-green-700">Pay with Razorpay</span>
+        <Lock className="w-3 h-3 text-green-400 ml-auto" />
+      </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-600">
+          <p className="font-medium">Error</p>
+          <p>{error}</p>
+          {error.includes("server") && (
+            <p className="mt-2 text-xs text-red-500">
+              Make sure the API server is running on port 8080.
+            </p>
+          )}
+        </div>
+      )}
+
+      <div className="space-y-3">
+        <input
+          placeholder="Full Name"
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+          className="w-full border border-green-200 rounded-xl px-3 py-2.5 text-sm font-body outline-none focus:ring-2 focus:ring-green-300 bg-white"
+        />
+        <input
+          placeholder="Email Address"
+          type="email"
+          value={form.email}
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+          className="w-full border border-green-200 rounded-xl px-3 py-2.5 text-sm font-body outline-none focus:ring-2 focus:ring-green-300 bg-white"
+        />
+        <input
+          placeholder="Phone Number"
+          type="tel"
+          value={form.phone}
+          onChange={(e) => setForm({ ...form, phone: e.target.value })}
+          className="w-full border border-green-200 rounded-xl px-3 py-2.5 text-sm font-body outline-none focus:ring-2 focus:ring-green-300 bg-white"
+        />
+        <textarea
+          placeholder="Shipping Address"
+          value={form.address}
+          onChange={(e) => setForm({ ...form, address: e.target.value })}
+          rows={3}
+          className="w-full border border-green-200 rounded-xl px-3 py-2.5 text-sm font-body outline-none focus:ring-2 focus:ring-green-300 bg-white resize-none"
+        />
+      </div>
+
+      <button
+        onClick={handlePay}
+        disabled={loading}
+        className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-body font-bold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
+      >
+        {loading ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Processing...
+          </>
+        ) : (
+          `Pay ${formatPrice(total)}`
+        )}
+      </button>
     </motion.div>
   );
 }
@@ -338,6 +487,37 @@ export function CartDrawer() {
                             >
                               <div className="px-4 pb-4">
                                 <CardPanel total={grandTotal} onClose={handleClose} />
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+
+                      {/* Razorpay */}
+                      <div className="border border-gray-100 rounded-2xl overflow-hidden">
+                        <button
+                          onClick={() => selectPayment("razorpay")}
+                          className={`w-full flex items-center gap-3 px-4 py-3.5 transition-colors ${paymentMethod === "razorpay" ? "bg-green-50" : "bg-white hover:bg-gray-50"}`}
+                        >
+                          <div className="w-9 h-9 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
+                            <CreditCard className="w-4 h-4 text-green-600" />
+                          </div>
+                          <div className="text-left flex-1">
+                            <p className="font-body font-bold text-sm text-foreground">Pay with Razorpay</p>
+                            <p className="text-[10px] text-muted-foreground font-body">Cards, UPI, Netbanking & more</p>
+                          </div>
+                          <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${paymentMethod === "razorpay" ? "rotate-180" : ""}`} />
+                        </button>
+                        <AnimatePresence>
+                          {paymentMethod === "razorpay" && (
+                            <motion.div
+                              initial={{ height: 0 }}
+                              animate={{ height: "auto" }}
+                              exit={{ height: 0 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="px-4 pb-4">
+                                <RazorpayPanel total={grandTotal} items={items} onClose={handleClose} />
                               </div>
                             </motion.div>
                           )}

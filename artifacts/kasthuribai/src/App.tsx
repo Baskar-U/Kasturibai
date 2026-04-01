@@ -6,6 +6,8 @@ import { ThemeProvider } from "@/hooks/use-theme";
 import Home from "@/pages/Home";
 import Collections from "@/pages/Collections";
 import VideoShopping from "@/pages/VideoShopping";
+import MyOrders from "@/pages/MyOrders";
+import OrderTracking from "@/pages/OrderTracking";
 import NotFound from "@/pages/not-found";
 import { WelcomeAudio } from "@/components/WelcomeAudio";
 
@@ -17,6 +19,8 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/collections" component={Collections} />
       <Route path="/video-shopping" component={VideoShopping} />
+      <Route path="/my-orders" component={MyOrders} />
+      <Route path="/order-tracking/:orderId" component={OrderTracking} />
       <Route component={NotFound} />
     </Switch>
   );
